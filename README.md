@@ -1,7 +1,5 @@
 # SportsBall
 
-## Setti
-
 ## Installation
 
 1. Edit .env.example:
