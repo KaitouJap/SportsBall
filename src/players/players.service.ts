@@ -2,50 +2,66 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Player } from './entities/player.entity';
+import { player, team } from '@prisma/client';
 
 @Injectable()
 export class PlayersService {
-  private db: PrismaService;
-  constructor(db: PrismaService) { this.db = db; }
+  constructor(private db: PrismaService) {}
 
-  async create(createPlayerDto: CreatePlayerDto) {
-    await this.db.player.create({ 
+  /**
+   * Create a new player
+   * @param createPlayerDto Data to create a new player
+   * @returns Created player
+   */
+  async create(createPlayerDto: CreatePlayerDto): Promise<player> {
+    return this.db.player.create({ 
       data: {
         ...createPlayerDto,
-        birthDate: new Date(createPlayerDto.birthDate),
       }
      });
   }
 
-  findAll(): Promise<Player[]> {
-    return this.db.player.findMany();
+  /**
+   * Find all players
+   * @returns List of players with team information
+   */
+  async findAll(): Promise<(player & team)[]> {
+    return this.db.player.findMany({ include: { team: true } });
   }
 
-  async findOne(id: number): Promise<Player> {
-    const result = await this.db.player.findUnique({ where: { id } });
-    if (!result) {
-      throw new NotFoundException(`Player #${id} not found`);
-    }
-    return result;
+  /**
+   * Find a player by ID
+   * @param id Player ID
+   * @returns Player with team information
+   */
+  async findOne(id: number): Promise<player & team> {
+    return this.db.player.findFirstOrThrow({ where: { id }, include: { team: true } });
   }
 
-  async update(id: number, updatePlayerDto: UpdatePlayerDto): Promise<Player> {
-    await this.findOne(id);
-    return await this.db.player.update({
+  /**
+   * Update a player
+   * @param id Player ID
+   * @param updatePlayerDto Data to update a player
+   * @returns Updated player
+   */
+  async update(id: number, updatePlayerDto: UpdatePlayerDto): Promise<player> {
+    return this.db.player.update({
       where: {
         id
       },
       data: {
         ...updatePlayerDto,
-        birthDate: new Date(updatePlayerDto.birthDate),
       }
     });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
-    await this.db.player.delete({
+  /**
+   * Remove a player
+   * @param id Player ID
+   * @returns Removed player
+   */
+  async remove(id: number): Promise<player> {
+    return this.db.player.delete({
       where: { id }
     });
   }

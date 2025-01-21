@@ -3,25 +3,33 @@ import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { PlayersService } from 'src/players/players.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { team } from '@prisma/client';
+import { player, team } from '@prisma/client';
 
 @Injectable()
 export class TeamsService {
-  private db: PrismaService;
-  private readonly p: PlayersService;
-  constructor(db: PrismaService, p: PlayersService) { 
-    this.db = db;
-    this.p = p;
+  constructor(private db: PrismaService) {}
+
+  /**
+   * Create a new team
+   * @param createTeamDto Data to create a new team
+   */
+  async create(createTeamDto: CreateTeamDto): Promise<team> {
+    return this.db.team.create({ data: createTeamDto });
   }
 
-  async create(createTeamDto: CreateTeamDto) {
-    await this.db.team.create({ data: createTeamDto });
-  }
-
-  findAll(): Promise<team[]> {
+  /**
+   * Retrieve all teams
+   * @returns All teams
+   */
+  async findAll(): Promise<team[]> {
     return this.db.team.findMany();
   }
 
+  /**
+   * Retrieve a single team
+   * @param id Team ID
+   * @returns The team with the given ID
+   */
   async findOne(id: number): Promise<team> {
     const result = await this.db.team.findUnique({ where: { id } });
     if (!result) {
@@ -30,7 +38,11 @@ export class TeamsService {
     return result;
   }
 
-  findAllPlayers(): Promise<team[]> {
+  /**
+   * Retrieve all teams with their players
+   * @returns All teams with their players
+   */
+  async findAllPlayers(): Promise<(team & { players: player[] })[]> {
     return this.db.team.findMany({
        include: {
         players: true
@@ -38,26 +50,38 @@ export class TeamsService {
     });
   }
 
+  /**
+   * Update a team
+   * @param id Id of the team to update
+   * @param updateTeamDto Data to update the team
+   * @returns The updated team
+   */
   async update(id: number, updateTeamDto: UpdateTeamDto): Promise<team> {
-    await this.findOne(id);
-    return await this.db.team.update({ where: { id }, data: updateTeamDto });
+    return this.db.team.update({ where: { id }, data: updateTeamDto });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
-    await this.db.team.delete({ where: { id } });
+  /**
+   * Delete a team
+   * @param id ID of the team to delete
+   */
+  async remove(id: number): Promise<team> {
+    return this.db.team.delete({ where: { id } });
   }
 
-  async addPlayer(tId: number, pId: number): Promise<team> {
-    await this.findOne(tId);
-    await this.p.findOne(pId);
-    return await this.db.player.update({
+  /**
+   * Add a player to a team
+   * @param tId Team ID
+   * @param pId Player ID
+   * @returns The updated team
+   */
+  async addPlayer(tId: number, pId: number): Promise<team & { players: player[] }> {
+    return this.db.team.update({
       data: {
-        team: { connect: { id: tId } }
+        players: { connect: { id: pId } }
       },
-      where: { id: pId },
+      where: { id: tId },
       include: {
-        team: true
+        players: true
       }
     });
   }
