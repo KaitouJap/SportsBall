@@ -14,6 +14,7 @@ export class MatchesController {
   @ApiOperation({ summary: 'Create a new match' })
   @ApiResponse({ status: 201, description: 'The match has been successfully created.', type: MatchWithTeamNames })
   @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 404, description: 'Team not found.' })
   @ApiBody({ type: CreateMatchDto })
   async create(@Body() createMatchDto: CreateMatchDto): Promise<match & { homeTeam: { name: string }; awayTeam: { name: string } }> {
     return this.matchesService.create(createMatchDto);
@@ -22,6 +23,7 @@ export class MatchesController {
   @Get()
   @ApiOperation({ summary: 'Retrieve all matches' })
   @ApiResponse({ status: 200, description: 'All matches with their home and away teams', type: [MatchWithTeamNames] })
+  @ApiResponse({ status: 500, description: 'Internal server error.' })
   async findAll(): Promise<(match & { homeTeam: { name: string }; awayTeam: { name: string } })[]> {
     return this.matchesService.findAll();
   }
