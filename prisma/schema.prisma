@@ -26,4 +26,17 @@ model team {
   id      Int      @id @default(autoincrement())
   name    String
   players player[]
+  homeTeam match[] @relation("homeTeam")
+  awayTeam match[] @relation("awayTeam")
+}
+
+model match {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  homeTeamId  Int
+  awayTeamId  Int
+  homeTeam    team     @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
+  awayTeam    team     @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
+  homeGoals   Int
+  awayGoals   Int
 }
