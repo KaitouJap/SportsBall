@@ -8,6 +8,7 @@ import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 import { TeamsModule } from './teams/teams.module';
 import { PlayersModule } from './players/players.module';
 import { ResponseObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { MatchesModule } from './matches/matches.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -33,7 +34,7 @@ async function bootstrap() {
     .setVersion('v1.0')
     .build();
   const options: SwaggerDocumentOptions = {
-    include: [TeamsModule, PlayersModule],
+    include: [TeamsModule, PlayersModule, MatchesModule],
   };
   const swaggerOptions: SwaggerCustomOptions = {
     customfavIcon: '/football.png',

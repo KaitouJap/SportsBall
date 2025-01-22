@@ -33,10 +33,10 @@ model team {
 model match {
   id          Int      @id @default(autoincrement())
   date        DateTime
-  homeTeamId  Int
-  awayTeamId  Int
-  homeTeam    team     @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
-  awayTeam    team     @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
+  homeTeamId  Int?
+  awayTeamId  Int?
+  homeTeam    team?     @relation(fields: [homeTeamId], references: [id], name: "homeTeam")
+  awayTeam    team?     @relation(fields: [awayTeamId], references: [id], name: "awayTeam")
   homeGoals   Int
   awayGoals   Int
 }
